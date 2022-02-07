@@ -1,3 +1,4 @@
+from pyexpat.errors import messages
 from tkinter import *
 import mysql.connector
 from tkinter import messagebox
@@ -20,7 +21,15 @@ JanelaLogin.mostrar()
 """
 
 
-class JanelaLogin():
+class AdminJanela:
+    def __int__(self):
+        self.root = Tk()
+        self.root.title('Admin')
+        self.root.geometry('500x500')
+        self.root.mainloop()
+
+
+class JanelaLogin:
 
     def verificarLogin(self):
         autenticado = False
@@ -39,8 +48,6 @@ class JanelaLogin():
 
         usuario = self.login.get()
         senha = self.password.get()
-
-
 
         try:
             with conexao.cursor() as cx:
@@ -67,7 +74,50 @@ class JanelaLogin():
             self.root.destroy()
 
             if usuarioMaster:
-                messagebox.showinfo('login', 'Usuário autenticado')
+                # messagebox.showinfo('login', 'Usuário autenticado')
+                AdminJanela()
+
+    def cadastrar(self):
+        Label(self.root, text='Chave de seguranca').grid(row=3, column=0, pady=5, padx=5)
+        self.codigoSeguranca=Entry(self.root, show='*')
+        self.codigoSeguranca.grid(row=3, colum=1, pady=5, padx=10)
+        Button(self.root, text='Confirmar cadastro', width=15, bg='blue1', command=self.cadastrarBackEnd()).grid(row=4, column=0, columnspan=3, pady=5, padx=10)
+
+    def cadastroBackEnd(self):
+        codigoPadrao='123@h'
+
+        if self.codigoSeguranca.get() == codigoPadrao:
+            if len(self.login.get()) <=20:
+                if len(self.senha.get()) <=50:
+                    nome=self.login.get()
+                    senha=self.senha.get()
+
+                    try:
+                        conexao = mysql.connector.connect(
+                            host='',
+                            user='lucas',
+                            password='12345',
+                            db='erp',
+                            charset='utf8mb4'
+                        )
+                    except:
+                        print('Erro ao conectar ao banco de dados')
+
+                    try:
+                        with conexao.cursor() as c:
+                            c.execute('INSERT INTO cadastros(nome,senha,nivel) values (%s %s %s)', (nome, senha, 1))
+                            c.commit()
+                        messagebox.showinfo('Cadastro', 'Usuario cadastrado com sucesso!')
+                        self.root.destroy()
+                    except:
+                        print('Erro ao se conectar a base de dados')
+
+                else:
+                    messagebox.showinfo('Erro', 'Insiria uma senha com 50 ou menos caracteres')
+            else:
+                messagebox.showinfo('Erro', 'Insira uma senha com 20 ou menos caracteres')
+        else:
+            messagebox.showinfo('Erro', 'Insira no máximo 50 caracteres na senha')
 
     def __init__(self):
         self.root = Tk()
@@ -82,9 +132,9 @@ class JanelaLogin():
         Label(self.root, text='Senha').grid(row=2, column=0)
         self.password = Entry(self.root)
         self.password.grid(row=2, column=1, padx=5, pady=5)
-        Button(self.root, text='Login', bg='green3', width=10, command=self.verificarLogin).grid(row=3, column=0,
-                                                                                                   padx=5, pady=5)
-        Button(self.root, text='Cadastrar', bg='orange3', width=10).grid(row=3, column=1, padx=5, pady=5)
+        Button(self.root, text='Login', bg='green3', width=10, command=self.verificarLogin).grid(row=5, column=0,
+                                                                                                 padx=5, pady=5)
+        Button(self.root, text='Cadastrar', bg='orange3', width=10).grid(row=5, column=1, padx=5, pady=5)
 
         self.root.mainloop()
 
